@@ -84,6 +84,6 @@ const styles = StyleSheet.create({
   text: {
     color: "white",
     fontSize: hp(2.5),
-    fontWeight: theme.fonts.bold,
+    fontWeight: '800',
   },
 });

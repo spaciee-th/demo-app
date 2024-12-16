@@ -14,8 +14,12 @@ import { StatusBar } from "expo-status-bar";
 import { hp, wp } from "../helpers/common";
 import { theme } from "../constants/theme";
 import Button from "@/components/Button";
+import { useRouter } from "expo-router";
 
 const Welcome = () => {
+
+    const rounter = useRouter();
+
   return (
     <ScreenWrapper bg="white">
       <StatusBar style="dark" />
@@ -37,13 +41,14 @@ const Welcome = () => {
         <View style={styles.footer as StyleProp<ViewStyle>}>
           <Button
             title="Getting Started"
+            onPress={() => rounter.push("/signUp")}
             buttonStyle={{ marginHorizontal: wp(3) }}
           />
           <View style={styles.bottomTextContainer as StyleProp<ViewStyle>}>
             <Text style={styles.loginText as StyleProp<TextStyle>}>
               Already have an account?
             </Text>
-            <Pressable>
+            <Pressable onPress={() => rounter.push("/login")}>
               <Text
                 style={[
                   styles.loginText as StyleProp<TextStyle>,
