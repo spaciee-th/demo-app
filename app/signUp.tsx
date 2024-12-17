@@ -18,6 +18,7 @@ import { theme } from "@/constants/theme";
 import Input from "@/components/Input";
 import Icon from "@/assets/icons";
 import Button from "@/components/Button";
+import { supabase } from "@/lib/supabase";
 
 const SignUp = () => {
   const router = useRouter();
@@ -27,21 +28,64 @@ const SignUp = () => {
   const passwordRef = useRef("");
 
   const [loading, setLoading] = useState(false);
-  const onSubmit = () => {
-    if(!emailRef.current || !passwordRef.current || !nameRef.current) {
+  const onSubmit = async () => {
+    if (!emailRef.current || !passwordRef.current || !nameRef.current) {
       Alert.alert("Signup", "Please fill all the fields!");
       return;
     }
+  
+    let name = nameRef.current.trim();
+    let email = emailRef.current.trim();
+    let password = passwordRef.current.trim();
+  
+    setLoading(true);
+  
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+  
+      console.log("error", JSON.stringify(error));
+      console.log("session", session);
+  
+      if (error) {
+        Alert.alert("Signup", error.message);
+        return;
+      }
+  
+      Alert.alert("Signup", "Successfully signed up!");
+      router.push("/login");
+    } catch (err: any) {
+      console.error("Unexpected error during signup:", err);
+      Alert.alert("Signup", "An unexpected error occurred. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   return (
-    <ScreenWrapper bg="white" >
+    <ScreenWrapper bg="white">
       <StatusBar style="dark" />
       <View style={styles.container as StyleProp<ViewStyle>}>
         <BackButton onPress={router} />
         <View style={styles.welcomeText as StyleProp<ViewStyle>}>
-          <Text style={styles.welcomeTextText as StyleProp<TextStyle>}> Let's</Text>
-          <Text style={styles.welcomeTextText as StyleProp<TextStyle>}>Get Started</Text>
+          <Text style={styles.welcomeTextText as StyleProp<TextStyle>}>
+            {" "}
+            Let's
+          </Text>
+          <Text style={styles.welcomeTextText as StyleProp<TextStyle>}>
+            Get Started
+          </Text>
         </View>
 
         <View style={styles.form as StyleProp<ViewStyle>}>
