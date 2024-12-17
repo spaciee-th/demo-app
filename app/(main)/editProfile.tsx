@@ -2,14 +2,14 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import ScreenWrapper from '@/components/screenWrapper'
 
-const Notifications = () => {
+const EditProfile = () => {
   return (
-    <ScreenWrapper bg="white">
-      <Text>Notifications</Text>
+    <ScreenWrapper>
+      <Text>EditProfile</Text>
     </ScreenWrapper>
   )
 }
 
-export default Notifications
+export default EditProfile
 
 const styles = StyleSheet.create({})

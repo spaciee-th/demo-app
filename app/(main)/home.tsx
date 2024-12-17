@@ -22,14 +22,9 @@ import { getUserImageSrc } from "@/services/imageService";
 const Home = () => {
   const { setAuth } = useAuth();
   const router = useRouter();
-  const onLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Logout error:", error.message);
-    }
-  };
+ 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper bg="white">
       <View style={styles.container as StyleProp<ViewStyle>}>
         <View style={styles.header as StyleProp<ViewStyle>}>
           <Text style={styles.title as StyleProp<TextStyle>}>LinkUp</Text>
