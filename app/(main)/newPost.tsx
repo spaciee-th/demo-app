@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import ScreenWrapper from '@/components/screenWrapper'
 
 const NewPost = () => {
   return (
-    <View>
+    <ScreenWrapper bg="white">
       <Text>NewPost</Text>
-    </View>
+    </ScreenWrapper>
   )
 }
 
