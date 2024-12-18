@@ -20,7 +20,7 @@ import Avatar from "@/components/Avatar";
 import { getUserImageSrc } from "@/services/imageService";
 
 const Home = () => {
-  const { setAuth } = useAuth();
+  const { setAuth, user } = useAuth();
   const router = useRouter();
  
   return (
@@ -47,7 +47,7 @@ const Home = () => {
             </Pressable>
             <Pressable onPress={() => router.push("/profile")}>
               <Avatar
-                uri={undefined}
+                uri={user?.image}
                 size={hp(4.3)}
                 rounded={theme.radius.sm}
                 style={{ borderWidth: 2 }}

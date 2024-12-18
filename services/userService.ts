@@ -9,9 +9,27 @@ export const getUserData = async (userId: string) => {
             .single();
         if (error) {
             console.log(error)
-            return {success: false, msg: error?.message}
+            return { success: false, msg: error?.message }
         } else {
-            return {success: true, data}
+            return { success: true, data }
+        }
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+
+export const updateUserData = async (userId: string, data: any) => {
+    try {
+        const { error } = await supabase
+            .from("users")
+            .update(data)
+            .eq("id", userId)
+        if (error) {
+            console.log(error)
+            return { success: false, msg: error?.message }
+        } else {
+            return { success: true, data }
         }
     } catch (e) {
         console.log(e)
