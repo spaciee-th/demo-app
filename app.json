@@ -9,7 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload files.",
+        "NSCameraUsageDescription": "We need access to your camera to take pictures.",
+        "NSMicrophoneUsageDescription": "We need access to your microphone to record audio."
+      }
     },
     "android": {
       "adaptiveIcon": {
