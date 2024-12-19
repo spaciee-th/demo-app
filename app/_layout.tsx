@@ -3,7 +3,10 @@ import { supabase } from "@/lib/supabase";
 import { getUserData } from "@/services/userService";
 import { Stack, useRouter } from "expo-router";
 import { useEffect } from "react";
+import { LogBox } from "react-native";
 
+
+LogBox.ignoreLogs(["Warning: TNodeChildrenRenderer:","Warning: MemoizedTNodeRenderer:", "Warning: TRenderEngineProvider:"]);
 const _layout = () => {
   return (
     <AuthProvider>

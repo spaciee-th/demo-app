@@ -82,7 +82,7 @@ const NewPost = () => {
     return getSupabaseFileUrl(file)?.uri;
   };
   const onSubmit = async () => {
-    if (!bodyRef.current || !file) {
+    if (!bodyRef.current ) {
       Alert.alert("Create Post", "Please fill all the fields!");
       return;
     }
