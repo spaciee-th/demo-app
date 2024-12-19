@@ -1,4 +1,5 @@
 import {
+  FlatList,
   Pressable,
   StyleProp,
   StyleSheet,
@@ -7,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/screenWrapper";
 import Button from "@/components/Button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,11 +19,57 @@ import Icon from "@/assets/icons";
 import { useRouter } from "expo-router";
 import Avatar from "@/components/Avatar";
 import { getUserImageSrc } from "@/services/imageService";
+import { fetchPost } from "@/services/postService";
+import PostCard from "@/components/PostCard";
+import Loading from "@/components/Loading";
+import { getUserData } from "@/services/userService";
 
+var limit = 0;
 const Home = () => {
   const { setAuth, user } = useAuth();
   const router = useRouter();
+
+  const [post, setPost] = useState<any>([]);
+  const handlePostEvent = async (payload: any) => {
+    console.log("Realtime Event Received:", payload);
+    console.log(payload.eventType === "INSERT" && payload?.new?.id)
+    if (payload.eventType === "INSERT" && payload?.new?.id) {
+      let newPost = { ...payload.new };
+  
+      let res = await getUserData(newPost?.userId);
+      newPost.user = res?.success ? res?.data : {};
+      console.log("newPost", newPost);
+      setPost((prevPosts: any) => [newPost, ...prevPosts]);
+
+    }
+  };
+
+  useEffect(() => {
+    let postChannel = supabase.channel("posts").on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "posts",
+      },
+      handlePostEvent
+    ).subscribe();
+    getPosts();
+
+    return() => {
+      supabase.removeChannel(postChannel);
+    }
+  }, []);
+
  
+
+  const getPosts = async () => {
+    let res = await fetchPost();
+    if (res && res.success && res.data) {
+      setPost(res.data);
+    }
+  };
+
   return (
     <ScreenWrapper bg="white">
       <View style={styles.container as StyleProp<ViewStyle>}>
@@ -55,6 +102,20 @@ const Home = () => {
             </Pressable>
           </View>
         </View>
+
+        <FlatList
+          data={post}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listSyle as StyleProp<ViewStyle>}
+          renderItem={({ item }) => (
+            <PostCard item={item} currentUser={user} router={router} />
+          )}
+          ListFooterComponent={
+            <View style={{ marginVertical: post.length === 0 ? 200 : 30 }}>
+              <Loading />
+            </View>
+          }
+        />
       </View>
     </ScreenWrapper>
   );
