@@ -1,4 +1,5 @@
 import {
+  Alert,
   Pressable,
   ScrollView,
   StyleProp,
@@ -23,7 +24,8 @@ import Button from "@/components/Button";
 import * as ImagePicker from "expo-image-picker";
 import { getSupabaseFileUrl } from "@/services/imageService";
 import { Image } from "expo-image";
-import {Video} from "expo-av";
+import { Video } from "expo-av";
+import { createOrUpdatePost } from "@/services/postService";
 
 const NewPost = () => {
   const { user } = useAuth();
@@ -65,7 +67,7 @@ const NewPost = () => {
     if (isLocaFile(file)) {
       return file.type;
     }
-    if (file.includes("postImage")) {
+    if (file.includes("postImages")) {
       return "image";
     }
     return "video";
@@ -79,7 +81,30 @@ const NewPost = () => {
 
     return getSupabaseFileUrl(file)?.uri;
   };
-  const onSubmit = async () => {};
+  const onSubmit = async () => {
+    if (!bodyRef.current || !file) {
+      Alert.alert("Create Post", "Please fill all the fields!");
+      return;
+    }
+
+    let data = {
+      file,
+      body: bodyRef.current,
+      userId: user?.id,
+    }
+
+    setLoading(true);
+    let res =  await createOrUpdatePost(data);
+    setLoading(false);
+    if(res && res.success){
+      setFile(null);
+      bodyRef.current = "";
+      editorRef.current = null;
+      router.back();
+    }else{
+      Alert.alert("Create Post", 'Could not create your post');
+    }
+  };
   return (
     <ScreenWrapper bg="white">
       <View style={styles.container as StyleProp<ViewStyle>}>
@@ -110,7 +135,13 @@ const NewPost = () => {
           {file && (
             <View style={styles.file as StyleProp<ViewStyle>}>
               {getFileType(file) === "video" ? (
-               <Video style={{ flex: 1 }} source={{ uri: getFileUri(file) }} useNativeControls resizeMode="cover" isLooping/>
+                <Video
+                  style={{ flex: 1 }}
+                  source={{ uri: getFileUri(file) }}
+                  useNativeControls
+                  resizeMode="cover"
+                  isLooping
+                />
               ) : (
                 <Image
                   source={{ uri: getFileUri(file) }}
@@ -119,7 +150,10 @@ const NewPost = () => {
                 />
               )}
 
-              <Pressable style={styles.closeIcon as StyleProp<ViewStyle>} onPress={() => setFile(null)}>
+              <Pressable
+                style={styles.closeIcon as StyleProp<ViewStyle>}
+                onPress={() => setFile(null)}
+              >
                 <Icon name="delete" size={20} color={"white"} />
               </Pressable>
             </View>
@@ -158,7 +192,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
-    borderRadius:50,
+    borderRadius: 50,
     backgroundColor: "rgba(255,0,0,0.7)",
     padding: 5,
   },
