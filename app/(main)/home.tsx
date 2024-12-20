@@ -24,48 +24,54 @@ import PostCard from "@/components/PostCard";
 import Loading from "@/components/Loading";
 import { getUserData } from "@/services/userService";
 
-var limit = 0;
+var limit = 10;
 const Home = () => {
   const { setAuth, user } = useAuth();
   const router = useRouter();
 
   const [post, setPost] = useState<any>([]);
+  const [hasMore, setHasMore] = useState(true);
   const handlePostEvent = async (payload: any) => {
     console.log("Realtime Event Received:", payload);
-    console.log(payload.eventType === "INSERT" && payload?.new?.id)
+    console.log(payload.eventType === "INSERT" && payload?.new?.id);
     if (payload.eventType === "INSERT" && payload?.new?.id) {
       let newPost = { ...payload.new };
-  
+
       let res = await getUserData(newPost?.userId);
       newPost.user = res?.success ? res?.data : {};
       console.log("newPost", newPost);
       setPost((prevPosts: any) => [newPost, ...prevPosts]);
-
     }
   };
 
   useEffect(() => {
-    let postChannel = supabase.channel("posts").on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "posts",
-      },
-      handlePostEvent
-    ).subscribe();
+    let postChannel = supabase
+      .channel("posts")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "posts",
+        },
+        handlePostEvent
+      )
+      .subscribe();
+
     getPosts();
 
-    return() => {
+    return () => {
       supabase.removeChannel(postChannel);
-    }
+    };
   }, []);
 
- 
-
   const getPosts = async () => {
-    let res = await fetchPost();
+    if (!hasMore) return;
+    limit = limit + 4;
+    console.log("limit", limit);
+    let res = await fetchPost(limit);
     if (res && res.success && res.data) {
+      if (post.length === res.data.length) setHasMore(false);
       setPost(res.data);
     }
   };
@@ -110,10 +116,20 @@ const Home = () => {
           renderItem={({ item }) => (
             <PostCard item={item} currentUser={user} router={router} />
           )}
+          onEndReached={() => getPosts()}
+          onEndReachedThreshold={0}
           ListFooterComponent={
-            <View style={{ marginVertical: post.length === 0 ? 200 : 30 }}>
-              <Loading />
-            </View>
+            hasMore ? (
+              <View style={{ marginVertical: post.length === 0 ? 200 : 30 }}>
+                <Loading />
+              </View>
+            ) : (
+              <View style={{ marginVertical: 30 }}>
+                <Text style={styles.noPosts as StyleProp<TextStyle>}>
+                  No more posts
+                </Text>
+              </View>
+            )
           }
         />
       </View>

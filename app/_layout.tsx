@@ -5,8 +5,11 @@ import { Stack, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { LogBox } from "react-native";
 
-
-LogBox.ignoreLogs(["Warning: TNodeChildrenRenderer:","Warning: MemoizedTNodeRenderer:", "Warning: TRenderEngineProvider:"]);
+LogBox.ignoreLogs([
+  "Warning: TNodeChildrenRenderer:",
+  "Warning: MemoizedTNodeRenderer:",
+  "Warning: TRenderEngineProvider:",
+]);
 const _layout = () => {
   return (
     <AuthProvider>
@@ -35,9 +38,13 @@ const MainLayout = () => {
   const updateUserData = async (userId: string, email?: string) => {
     let res = await getUserData(userId);
     if (res && res.success) {
-      setUserData({...res.data, email});
+      setUserData({ ...res.data, email });
     }
   };
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <Stack screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="(main)/postDetails" options={{
+      presentation: "modal"
+    }} />
+  </Stack>;
 };
 export default _layout;
