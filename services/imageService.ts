@@ -11,6 +11,24 @@ export const getUserImageSrc = (imagePath?: string) => {
     }
 };
 
+export const getLocalFilepath = (filepath: string) => {
+    let fileName = filepath.split("/").pop();
+    return `${FileSystem.documentDirectory}${fileName}`
+}
+export const downloadfile = async (filepath?: string) => {
+    try {
+        if(!filepath) return null
+        const {uri} = await FileSystem.downloadAsync(
+            filepath, getLocalFilepath(filepath)
+        )
+        return uri;
+    } catch (error) {
+        return null;
+    }
+}
+
+
+
 
 
 // Function to upload a file

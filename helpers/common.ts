@@ -5,5 +5,9 @@ const { width: deviceWidth, height: deviceHeight } = Dimensions.get('window');
 const hp = (percentage: number) => { return (percentage * deviceHeight) / 100; }
 const wp = (percentage: number) => { return (percentage * deviceWidth) / 100; }
 
+const stripHtmlTags = (html: string) => {
+    return html.replace(/(<([^>]+)>)/gm, "");
+}
 
-export { hp, wp }
+
+export { hp, wp, stripHtmlTags }
