@@ -137,11 +137,11 @@ const PostCard = ({
     Share.share(content);
     setIsLoading(false);
   };
-  console.log("likes", likes);
 
   let liked = likes.filter((like: any) => like.userId === currentUser.id)[0]
     ? true
     : false;
+
   return (
     <View
       style={[
@@ -241,7 +241,8 @@ const PostCard = ({
               color={theme.colors.textLight}
             />
           </TouchableOpacity>
-          <Text style={styles.count as StyleProp<TextStyle>}>0</Text>
+          <Text style={styles.count as StyleProp<TextStyle>}>{
+            item?.comments?.length}</Text>
         </View>
         <View style={styles.footerButton as StyleProp<ViewStyle>}>
           {!isloading ? (

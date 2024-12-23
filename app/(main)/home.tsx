@@ -32,7 +32,6 @@ const Home = () => {
   const [post, setPost] = useState<any>([]);
   const [hasMore, setHasMore] = useState(true);
   const handlePostEvent = async (payload: any) => {
-    console.log("Realtime Event Received:", payload);
     console.log(payload.eventType === "INSERT" && payload?.new?.id);
     if (payload.eventType === "INSERT" && payload?.new?.id) {
       let newPost = { ...payload.new };
@@ -53,6 +52,15 @@ const Home = () => {
           event: "*",
           schema: "public",
           table: "posts",
+        },
+        handlePostEvent
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "comments",
         },
         handlePostEvent
       )

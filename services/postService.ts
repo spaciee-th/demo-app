@@ -40,7 +40,8 @@ export const fetchPost = async (limit: number = 10) => {
             .select(`
                 *,
                 user:users (id, name, image),
-                postLikes (*)
+                postLikes (*),
+                comments (*, user: users (id, name, image))
               `)
             .order("created_at", { ascending: false })
             .limit(limit);
@@ -109,7 +110,7 @@ export const removePostLike = async (postId: number, userId: string) => {
 
 
 
-export const fetchPostDetails = async (postId: string ) => {
+export const fetchPostDetails = async (postId: string) => {
     try {
 
         const { data, error } = await supabase.
@@ -117,9 +118,11 @@ export const fetchPostDetails = async (postId: string ) => {
             .select(`
                 *,
                 user:users (id, name, image),
-                postLikes (*)
+                postLikes (*),
+                comments (*, user: users (id, name, image))
               `)
             .eq("id", postId)
+            .order("created_at", { ascending: false, foreignTable: "comments" })
             .single();
 
 
@@ -128,10 +131,56 @@ export const fetchPostDetails = async (postId: string ) => {
             console.log("fetch PostDetails Error", error);
             return { success: false, msg: 'Could not fetch post Details' }
         }
-        return { success: true, data: data };               
+        return { success: true, data: data };
 
     } catch (error) {
         console.log("fetch PostDetails Error", error);
         return { success: false, msg: 'Could not fetch post Details' }
+    }
+};
+
+
+export const createComment = async (comment: any) => {
+    try {
+        console.log("creating commen", comment);
+
+        const { data, error } = await supabase.
+            from("comments")
+            .insert(comment)
+            .select()
+            .single();
+
+
+        if (error) {
+            console.log("comment Error", error);
+            return { success: false, msg: 'Could not create your comment' }
+        }
+        return { success: true, data: data };
+
+    } catch (error) {
+        console.log("comment Error", error);
+        return { success: false, msg: 'Could not create your comment' }
+    }
+};
+
+export const removePostComment = async (commentId: string,) => {
+    try {
+
+
+        const { data, error } = await supabase.
+            from("comments")
+            .delete()
+            .eq("id", commentId)
+
+
+        if (error) {
+            console.log("comment remove like Error", error);
+            return { success: false, msg: 'Could not remove comment' }
+        }
+        return { success: true, data: commentId };
+
+    } catch (error) {
+        console.log("comment remove like Error", error);
+        return { success: false, msg: 'Could not remove comment' }
     }
 };
