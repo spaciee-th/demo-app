@@ -243,7 +243,7 @@ export const fetchPostNotifications = async (recID?: string) => {
             from("notifications")
             .select(`
                 *,
-                sender:users (id, name, image),
+                sender: senderId (id, name, image)
               `)
             .eq("receiverId", recID)
             .order("created_at", { ascending: false });

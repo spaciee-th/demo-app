@@ -40,6 +40,7 @@ const PostDetails = () => {
   const commentRef = useRef("");
   const { user } = useAuth();
   const router = useRouter();
+  console.log("postId", postId);
 
   useEffect(() => {
     if (postId) {
