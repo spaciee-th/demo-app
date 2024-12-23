@@ -31,6 +31,9 @@ interface PostCardProps {
   router: Router;
   hasShadow?: boolean;
   showMoreIcon?: boolean;
+  showDelete?: boolean;
+  onDelete?: (id: string) => void;
+  onEdit?: (item: any) => void;
 }
 
 interface content {
@@ -59,6 +62,9 @@ const PostCard = ({
   currentUser,
   router,
   hasShadow = true,
+  showDelete = false,
+  onDelete,
+  onEdit,
   showMoreIcon = true,
 }: PostCardProps) => {
   const shadowStyle = {
@@ -76,7 +82,7 @@ const PostCard = ({
   };
 
   const openPostDetails = () => {
-    if(!showMoreIcon) return;
+    if (!showMoreIcon) return;
     router.push({
       pathname: "./postDetails",
       params: {
@@ -142,6 +148,23 @@ const PostCard = ({
     ? true
     : false;
 
+  const handlePostEvent = async (payload: any) => {
+    Alert.alert("Logout", "Are you sure you want to do this ?", [
+      {
+        text: "Cancel",
+        onPress: () => {},
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: async () => {
+          onDelete  && onDelete(item.id);
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
   return (
     <View
       style={[
@@ -177,6 +200,21 @@ const PostCard = ({
               color={theme.colors.text}
             />
           </TouchableOpacity>
+        )}
+
+        {showDelete && currentUser.id === item?.user?.id && (
+          <View style={styles.actions as StyleProp<ViewStyle>}>
+            <TouchableOpacity
+              onPress={() => {
+                onEdit && onEdit(item);
+              }}
+            >
+              <Icon name="edit" color={theme.colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handlePostEvent}>
+              <Icon name="delete" color={theme.colors.rose} />
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
@@ -241,8 +279,9 @@ const PostCard = ({
               color={theme.colors.textLight}
             />
           </TouchableOpacity>
-          <Text style={styles.count as StyleProp<TextStyle>}>{
-            item?.comments?.length}</Text>
+          <Text style={styles.count as StyleProp<TextStyle>}>
+            {item?.comments?.length}
+          </Text>
         </View>
         <View style={styles.footerButton as StyleProp<ViewStyle>}>
           {!isloading ? (

@@ -16,6 +16,7 @@ import {
   createComment,
   fetchPost,
   fetchPostDetails,
+  removePost,
   removePostComment,
 } from "@/services/postService";
 import { hp, wp } from "@/helpers/common";
@@ -28,6 +29,7 @@ import Icon from "@/assets/icons";
 import CommentItem from "@/components/CommentItem";
 import { supabase } from "@/lib/supabase";
 import { getUserData } from "@/services/userService";
+import { createNotification } from "@/services/notification";
 
 const PostDetails = () => {
   const { postId } = useLocalSearchParams();
@@ -56,8 +58,6 @@ const PostDetails = () => {
       }, handleNewComment)
       .subscribe();
 
-      console.log("commentChannel", commentChannel);
-      
 
       return () => {
         supabase.removeChannel(commentChannel);
@@ -139,6 +139,20 @@ const PostDetails = () => {
         // getPostDetails();
         inputRef.current?.clear();
         commentRef.current = "";
+
+        if(user?.id !== post?.userId){
+            let notify = {
+              senderId: user?.id,
+              receiverId: post?.userId,
+              title: "New Comment",
+              data:JSON.stringify({
+                postId: post?.id,
+                commentId: res?.data?.id ?? 0  
+              })
+            }
+
+            const res =  await createNotification(notify);
+        }
       }
       // Alert.alert("Create Comment", "your comment created successfully");
     } catch (error) {
@@ -147,6 +161,30 @@ const PostDetails = () => {
       Alert.alert("Create Comment", "Could not create your comment");
     }
   };
+
+
+  const onEditPost = (item: any) => {
+    console.log("postId", item);
+    router.back();
+    router.push({
+      pathname: "./newPost",
+      params: {
+        ...item
+      },
+    });
+  }
+
+  const onDeletePost = async(
+    postId: string,
+  ) => {
+    console.log("postId", postId);
+    let res = await removePost(postId);
+    if(res && res.success){
+      router.back();
+    }else{
+      Alert.alert("Delete Post", "Something went wrong");
+    }
+  }
 
   return (
     <View style={styles.container as StyleProp<ViewStyle>}>
@@ -163,6 +201,9 @@ const PostDetails = () => {
           router={router}
           hasShadow={false}
           showMoreIcon={false}
+          showDelete={true}
+          onDelete={onDeletePost}
+          onEdit={onEditPost}
         />
 
         <View style={styles.inputContainer as StyleProp<ViewStyle>}>

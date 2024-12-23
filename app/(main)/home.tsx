@@ -35,11 +35,30 @@ const Home = () => {
     console.log(payload.eventType === "INSERT" && payload?.new?.id);
     if (payload.eventType === "INSERT" && payload?.new?.id) {
       let newPost = { ...payload.new };
+      newPost.postLikes = [];
+      newPost.comments = [{ count: 0 }];
 
       let res = await getUserData(newPost?.userId);
       newPost.user = res?.success ? res?.data : {};
       console.log("newPost", newPost);
       setPost((prevPosts: any) => [newPost, ...prevPosts]);
+    }
+
+    if (payload.eventType === "DElETE" && payload?.old?.id) {
+      setPost((prevPosts: any) =>
+        prevPosts.filter((post: any) => post.id !== payload.old.id)
+      );
+    }
+
+    if (payload.eventType === "UPDATE" && payload?.new?.id) {
+      setPost((prevPosts: any) =>
+        prevPosts.map((post: any) => {
+          if (post.id === payload.new.id) {
+            return { ...post, ...payload.new };
+          }
+          return post;
+        })
+      );
     }
   };
 
@@ -55,6 +74,11 @@ const Home = () => {
         },
         handlePostEvent
       )
+      .subscribe();
+
+
+      let postChannel2 = supabase
+      .channel("comments")
       .on(
         "postgres_changes",
         {
@@ -70,6 +94,7 @@ const Home = () => {
 
     return () => {
       supabase.removeChannel(postChannel);
+      supabase.removeChannel(postChannel2);
     };
   }, []);
 

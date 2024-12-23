@@ -1,5 +1,6 @@
 import {
   Alert,
+  FlatList,
   Pressable,
   StyleProp,
   StyleSheet,
@@ -9,7 +10,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import ScreenWrapper from "@/components/screenWrapper";
 import { useAuth } from "@/contexts/AuthContext";
 import { Router, useRouter } from "expo-router";
@@ -20,14 +21,19 @@ import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons";
 import { supabase } from "@/lib/supabase";
 import Avatar from "@/components/Avatar";
+import { fetchPost } from "@/services/postService";
+import PostCard from "@/components/PostCard";
+import Loading from "@/components/Loading";
 
 interface UserHeaderProps {
   user: any;
   router: Router;
   handleLogout: () => void;
 }
-
+var limit = 0;
 const Profile = () => {
+  const [post, setPost] = useState<any>([]);
+  const [hasMore, setHasMore] = useState(true);
   const { setAuth, user } = useAuth();
   const router = useRouter();
   const onLogout = async () => {
@@ -53,9 +59,46 @@ const Profile = () => {
     ]);
   };
 
+  const getPosts = async () => {
+    if (!hasMore) return;
+    limit = limit + 10;
+    console.log("limit", limit);
+    let res = await fetchPost(limit, user.id);
+    if (res && res.success && res.data) {
+      if (post.length === res.data.length) setHasMore(false);
+      setPost(res.data);
+    }
+  };
+
   return (
     <ScreenWrapper bg="white">
-      <UserHeader user={user} router={router} handleLogout={handleLogout} />
+      <FlatList
+        data={post}
+        ListHeaderComponentStyle={{  marginBottom:30 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listSyle as StyleProp<ViewStyle>}
+        renderItem={({ item }) => (
+          <PostCard item={item} currentUser={user} router={router} />
+        )}
+        ListHeaderComponent={
+          <UserHeader user={user} router={router} handleLogout={handleLogout} />
+        }
+        onEndReached={() => getPosts()}
+        onEndReachedThreshold={0}
+        ListFooterComponent={
+          hasMore ? (
+            <View style={{ marginVertical: post.length === 0 ? 200 : 30 }}>
+              <Loading />
+            </View>
+          ) : (
+            <View style={{ marginVertical: 30 }}>
+              <Text style={styles.noPosts as StyleProp<TextStyle>}>
+                No more posts
+              </Text>
+            </View>
+          )
+        }
+      />
     </ScreenWrapper>
   );
 };
@@ -63,7 +106,7 @@ const Profile = () => {
 const UserHeader = ({ user, router, handleLogout }: UserHeaderProps) => {
   return (
     <View
-      style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4) }}
+      style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4),}}
     >
       <View>
         <Header title="Profile" marginBottom={30} />
@@ -147,6 +190,15 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  listSyle: {
+    paddingTop: 20,
+    paddingHorizontal: wp(4),
+  },
+  noPosts: {
+    fontSize: hp(2),
+    textAlign: "center",
+    color: theme.colors.text,
   },
   headerContainer: {
     marginHorizontal: wp(4),
