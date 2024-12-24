@@ -10,7 +10,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ScreenWrapper from "@/components/screenWrapper";
 import Header from "@/components/Header";
 import { hp, wp } from "@/helpers/common";
@@ -18,7 +18,7 @@ import { theme } from "@/constants/theme";
 import Avatar from "@/components/Avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import RichTextEditor from "@/components/RichTextEditor";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import Icon from "@/assets/icons";
 import Button from "@/components/Button";
 import * as ImagePicker from "expo-image-picker";
@@ -34,6 +34,20 @@ const NewPost = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<any>(null);
+
+  const post = useLocalSearchParams();
+
+  useEffect(() => {
+    console.log("post", post);
+    if(post && post.id){
+      bodyRef.current = post?.body.toString();
+      setFile(post?.file);
+      setTimeout(() => {
+        editorRef?.current?.setContentHTML(post?.body);
+      },300)
+     
+    }
+  }, [post]);
 
   const onPickImage = async (isImage: boolean) => {
     let mediaConfig: ImagePicker.ImagePickerOptions = {
@@ -86,12 +100,13 @@ const NewPost = () => {
       Alert.alert("Create Post", "Please fill all the fields!");
       return;
     }
-
-    let data = {
+    const data = {
       file,
       body: bodyRef.current,
       userId: user?.id,
-    }
+      id: post?.id || null,
+    };
+    
 
     setLoading(true);
     let res =  await createOrUpdatePost(data);
@@ -175,7 +190,7 @@ const NewPost = () => {
         </ScrollView>
         <Button
           buttonStyle={{ height: hp(6.2) }}
-          title="Post"
+          title={post && post.id ? "Update Post" : "Create Post"}
           onPress={onSubmit}
           hasShadow={false}
           loading={loading}
